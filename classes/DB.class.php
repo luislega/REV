@@ -1,8 +1,8 @@
 <?php
 class DB {
-	protected $db_name = 'animaes_juntas';
-	protected $db_user = 'animaes_juntas';
-	protected $db_pass = 'MdTaTxjhTzp5BMs8';
+	protected $db_name = 'revdev_db';
+	protected $db_user = 'rev_site';
+	protected $db_pass = 'KNXGJbSNp23FatirP0BHLj6eW';
 	protected $db_host = 'localhost';
 	private $connection;
 	
@@ -12,6 +12,10 @@ class DB {
 		if ($pass) $this->db_pass = $pass;
 		if ($host) $this->db_host = $host;
 		$this->connect();
+	}
+	
+	public function gimme () {
+		return $this->connection;
 	}
 	
 	public function connect () {
