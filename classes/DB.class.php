@@ -1,16 +1,12 @@
 <?php
 class DB {
-	protected $db_name = 'revdev_db';
-	protected $db_user = 'rev_site';
-	protected $db_pass = 'KNXGJbSNp23FatirP0BHLj6eW';
-	protected $db_host = 'localhost';
 	private $connection;
 	
-	function __construct ($name, $user, $pass, $host) {
-		if ($name) $this->db_name = $name;
-		if ($user) $this->db_user = $user;
-		if ($pass) $this->db_pass = $pass;
-		if ($host) $this->db_host = $host;
+	function __construct ($name='revdev_db', $user='rev_site', $pass='KNXGJbSNp23FatirP0BHLj6eW', $host='mysql.revdevelopers.com') {
+		$this->db_name = $name;
+		$this->db_user = $user;
+		$this->db_pass = $pass;
+		$this->db_host = $host;
 		$this->connect();
 	}
 	
@@ -21,7 +17,6 @@ class DB {
 	public function connect () {
 		$this->connection = mysql_connect($this->db_host, $this->db_user, $this->db_pass);
 		mysql_select_db($this->db_name);
-		//mysql_query("SET NAMES 'utf8'", $this->connection);
 		return true;
 	}
 	
@@ -75,10 +70,6 @@ class DB {
 		$conditionsStr = $this->stringifyKV(" AND ", $conditions);
 		$q = "DELETE FROM $table WHERE $conditionsStr";
 		$result = mysql_query($q) or die(mysql_error());
-		/*if ($table == "tbl_tokens" || $table == "tbl_sessions") {
-			$this->housekeep($table);
-		}*/
-		//var_dump($q);
 		return $result;
 	}
 	
