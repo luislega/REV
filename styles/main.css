@@ -1,0 +1,25 @@
+@charset "UTF-8";
+#logo {
+	padding-top: 50px;
+	min-height: 10em;
+	height: 100%;
+	width: 90%;
+	margin: auto;
+	display: table-cell;
+	vertical-align: middle;
+}
+#logo img {
+	width:100%;
+}
+
+@media all and (orientation:landscape) {
+	#logo {
+		width: 85%;
+	}
+}
+
+@media only screen and (min-width:480px) {
+	#logo {
+		width: 85%;
+	}
+}
