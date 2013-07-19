@@ -10,7 +10,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Untitled Document</title>
 <link href="styles/boilerplate.css" rel="stylesheet" type="text/css">
-<link href="styles/grid.css" rel="stylesheet" type="text/css">
+<link href="styles/webfonts.css" rel="stylesheet" type="text/css">
+<link href="styles/main.css" rel="stylesheet" type="text/css">
 <!-- 
 To learn more about the conditional comments around the html tags at the top of the file:
 paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/
@@ -27,8 +28,25 @@ Do the following if you're using your customized build of modernizr (http://www.
 <script src="scripts/respond.min.js"></script>
 </head>
 <body>
-<div class="gridContainer clearfix">
-  <div id="logo"><img src="images/Logo.gif" width="100%" /></div>
+<div id="header">
+	<div class="headerContainer clearfix">
+        <div id="menu_button"></div>
+        <div id="logo"></div>
+        <div id="facebook"></div>
+        <div id="twitter"></div>
+    </div>
+</div>
+<div id="menu" class="shadow-top">
+    <nav>
+        <ul>
+            <li>ACERCA</li>
+            <li>TRABAJO</li>
+            <li>CONTACTO</li>
+        </ul>
+    </nav>
+</div>
+<div class="gridContainer clearfix movable">
+  <div id="content">This is the content for Layout Div Tag "content"</div>
 </div>
 </body>
 </html>
