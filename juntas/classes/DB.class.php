@@ -2,7 +2,7 @@
 
 class DB {
 	private $connection;
-	
+	// JUST FOR CHECKS
 	function __construct ($name='my_animaes_juntas', $user='animaes_juntas', $pass='MdTaTxjhTzp5BMs8', $host='mysql.revdevelopers.com') {
 		if ($name) $this->db_name = $name;
 		if ($user) $this->db_user = $user;
