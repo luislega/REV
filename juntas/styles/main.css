@@ -1,0 +1,358 @@
+@charset "UTF-8";
+#nueva_reserva {
+	right: 5%;
+	top: 1%;
+	width: 25px;
+	height: 25px;
+}
+#nueva_reserva img {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	cursor: pointer;
+}
+#semanaquentra {
+	left: 5%;
+	top: 1%;
+	width: 55px;
+	height: 25px;
+}
+#semanaquentra img:first-child {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	cursor: pointer;
+}
+#semanaquentra img:last-child {
+	position: absolute;
+	left: 80px;
+	top: 0px;
+	cursor: pointer;
+}
+div {
+	position: absolute;
+}
+#times {
+	position: absolute;
+	height: 85%;
+	width: 100%;
+	top: 10%;
+}
+#times #gutter {
+	position: absolute;
+	height: 100%;
+	width: 4.5%;
+	color: #737a7e;
+}
+#times #timeLines {
+	height: 100%;
+	width: 90%;
+	left: 5%;
+	background: #e9f1f5;
+}
+#times #timeLines div:nth-child(odd){
+	background: #FFF;
+}
+#times #timeLines div:last-child{
+	border-bottom: 1px solid #a3a8aa;
+}
+#timeLine {
+	width: 100%;
+	height: 85%;
+	top: 10%;
+}
+#timeLine #now {
+	background: #d42800;
+	height: 1px;
+	width: 90%;
+	right: 5%;
+}
+#timeLine #nowTime {
+	color: #d42800;
+	left: 96%;
+}
+#dayMarker {
+	background: rgba(0, 0, 0, 0.1);
+	height: 90%;
+	width: 90%;
+	left: 5%;
+	top: 5%;
+}
+#dayMarker #graph {
+	height: 100%;
+	width: 14.29%;
+	border-width: 6px;
+	border-top-width: 20px;
+	border-style: solid;
+	border-color: #dbce9b;
+}
+#dayMarker #markerHead  {
+	display: table;
+	text-align: center;
+	font-size: 0.8em;
+	color: #646b88;
+	width: 14.2%;
+	position: relative;
+	float: left;
+}
+#dayMarker #markerHead  p{
+	font-size: 18px;
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+}
+.timeSlot {
+	/*border-bottom-width: 1px;
+	border-bottom-style: inset;
+	border-bottom-color: #FB989C;*/
+	border-top-width: 1px;
+	border-top-style: inset;
+	border-top-color: #FB989C;
+}
+a {
+	color: inherit;
+	text-decoration: none;
+}
+html {
+	/*background: #d0dadf;*/
+}
+body {
+	font-family: "century gothic";
+	/*background: #d0dadf;*/
+	font-size: 14px;
+}
+#week {
+	position: absolute;
+	height: 85%;
+	width: 90%;
+	left: 5%;
+	top: 10%;
+}
+#back {
+	height: 87%;
+	width: 90%;
+	left: 5%;
+	top: 8.5%;
+	background: #e9f1f5;
+	border: 1px solid #55788a;
+}
+#days {
+	height: 87%;
+	width: 90%;
+	left: 5%;
+	top: 8.5%;
+	border: 1px solid #55788a;
+}
+#days div {
+	display: table;
+	width: 14.28571428571429%;
+	height: 100%;
+	float: left;
+	position: relative;
+	/*border-right: 1px solid #b8b8b8;*/
+}
+#dayHeads {
+	height: 3.5%;
+	line-height: 100%;
+	width: 90%;
+	border: 1px solid #55788a;
+	/*border-right: 1px solid #55788a;*/
+	border-bottom: 1px solid #9f946c;
+	/*border-left: 1px solid #55788a;*/
+	top: 5%;
+	left: 5%;
+	background: #aaafc5;
+}
+#dayHeads div {
+	display: table;
+	width: 14.2%;
+	text-align: center;
+	color: #646b88;
+	font-size: 0.8em;
+	height: 100%;
+	float: left;
+	position: relative;
+}
+#dayHeads div p {
+	display: table-cell; 
+	vertical-align: middle; 
+	text-align: center;
+	font-size: 18px;
+}
+#newReservation {
+	/*background: #d0dadf;
+	height: 53.041%;
+	width: 56.689%;
+	left: 21.728%;
+	top: 23.442%;
+	border-radius: 10px;
+	background-clip: content-box;
+	border: solid rgba(82,96,103,0.47) 6px;*/
+	border-bottom: 1px #aaaaaa solid;
+	color: #60666a;
+	top: 0px;
+	width:100%;
+	height: 300px;
+	font-size: 62.5%;
+}
+table tr {
+	height: 30px;
+}
+table tr td:first-child {
+	font-weight: bold;
+	text-align: right;
+}
+table tr:last-child td:last-child {
+	text-align: right;
+}
+#newReservation #head {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 21px;
+	color: #60666a;
+	text-align: center;
+	width: 100%;
+	top: 5.034%;
+}
+#newReservation #formContainer {
+	/*background: #f0f3f5;*/
+	-webkit-box-shadow: 8px 8px 6px -6px rgba(0,0,0,0.29) inset;
+	   -moz-box-shadow: 8px 8px 6px -6px rgba(0,0,0,0.29) inset;
+	        box-shadow: 8px 8px 6px -6px rgba(0,0,0,0.29) inset;
+	width: 90%;
+	top: 35px;
+	left: 5%;
+	height: 80.559%;
+}
+#newReservation #formContainer table {
+	position: absolute;
+	top: 41px;
+	left: 43px;
+	
+}
+input:focus, select:focus, textarea:focus {
+	outline: none;
+}
+#loggedUser {
+	position: absolute;
+	left: 41px;
+	top: 39px;
+	font-size: 21px;
+	color: #60666a;
+}
+#inicia {
+	position: absolute;
+	left: 828px;
+	top: 20px;
+	font-size: 18px;
+	color: #60666a;
+}
+#termina {
+	position: absolute;
+	left: 805px;
+	top: 78px;
+	font-size: 18px;
+	color: #60666a;
+}
+#descripcion {
+	position: absolute;
+	left: 1100px;
+	top: 20px;
+	font-size: 18px;
+	color: #60666a;
+	vertical-align: top;
+}
+#descripcion textarea {
+	max-width: 411px;
+	max-height: 190px;
+	min-width: 411px;
+	min-height: 190px;
+	width: 411px;
+	height: 190px;
+}
+#sendReservation {
+	position: absolute;
+	left: 1500px;
+	top: 215px;
+}
+#unameDiv {
+	font-size: 18px;
+	color: #60666a;
+}
+#pwdDiv {
+	font-size: 18px;
+	color: #60666a;
+}
+#rememberDiv {
+	font-size: 10px;
+	color: #60666a;
+}
+#loginBtn {
+	
+}
+.slot {
+	background-clip: content-box;
+	position: absolute;
+	/*border: 6px solid rgba(0,0,0,0.24);
+	border-radius: 0.8em;*/
+	overflow: hidden;
+	font-size: 1em;
+	width: 14.2857%;
+}
+#nombre_del_mes {
+	width: 100%;
+	top: 1%;
+	height: 30px;
+	font-size: 25px;
+	text-transform: uppercase;
+	color: #b2b2b2;
+	font-weight: bold;
+}
+#nombre_del_mes p {
+	border-radius: 15px;
+	text-align: center;
+	background: #ededed;
+	margin-left: auto;
+	margin-right: auto;
+	width: 300px;
+	display: block;
+	
+}
+.inner_text_shadow {
+	color: transparent;
+	text-shadow: #aeb9be 1px 1px 1px, #898f93 -0px -0px 0;
+	font-weight: bold;
+}
+#fullContainer {
+	height: 100%;
+	width: 100%;
+}
+.gradientBack {
+	background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(208,208,208,1) 100%); /* FF3.6+ */
+
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(208,208,208,1))); /* Chrome,Safari4+ */
+	
+	background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(208,208,208,1) 100%); /* Chrome10+,Safari5.1+ */
+	
+	background: -o-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(208,208,208,1) 100%); /* Opera 11.10+ */
+	
+	background: -ms-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(208,208,208,1) 100%); /* IE10+ */
+	
+	background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(208,208,208,1) 100%); /* W3C */
+	
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#d0d0d0',GradientType=0 ); /* IE6-9 */
+}
+.gradientBack2 {
+	background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(233,233,233,1) 100%); /* FF3.6+ */
+
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(233,233,233,1))); /* Chrome,Safari4+ */
+	
+	background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(233,233,233,1) 100%); /* Chrome10+,Safari5.1+ */
+	
+	background: -o-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(233,233,233,1) 100%); /* Opera 11.10+ */
+	
+	background: -ms-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(233,233,233,1) 100%); /* IE10+ */
+	
+	background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(233,233,233,1) 100%); /* W3C */
+	
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e9e9e9',GradientType=0 ); /* IE6-9 */
+}

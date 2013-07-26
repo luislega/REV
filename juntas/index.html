@@ -1,0 +1,726 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sala de Juntas</title>
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.8.0/build/cssreset/cssreset-min.css">
+<link href="styles/main.css" rel="stylesheet" type="text/css">
+<link href="styles/calendar.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="scripts/typeface.js"></script>
+<script type="text/javascript" src="scripts/century_regular.typeface.js"></script>
+<script type="text/javascript" src="scripts/century_bold.typeface.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="scripts/calendar.js"></script>
+<script type="text/javascript" src="scripts/hash.js"></script>
+<script type="text/javascript" id="mainScript">
+
+var weekdays = new Array ("domingo","lunes","martes","miércoles","jueves","viernes","sábado");
+var months = new Array ("enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
+var today, isRed, strForFrom, strForTo, oldData="", date, t0, tf, description, loggedUser, loggedIn, error, weekN=0, postAsAlias, adjusted=false;
+var cancelCLass = {"width":"100px", "height":"20px", "background":"#e85858", "color":"#f2cbcb", "border-radius":"10px", "bottom":"50px", "left":"25px", "cursor":"pointer"};
+var okCLass = {"width":"100px", "height":"20px", "background":"#369d36", "color":"#bfe9bf", "border-radius":"10px", "bottom":"50px", "left":"150px", "cursor":"pointer"};
+
+/*Array.prototype.map = function (callback) {
+	try {
+		var f = eval (callback);
+		
+		if (f.constructor === Function) {
+			for (var i in this) {
+				this [i] = f(this[i]);
+			}
+		}
+	}catch (e) {
+		alert (e);
+	}
+}*/
+
+$(document).ready(function(e) {
+	// CHANGE TO RELOAD
+	getWeek();
+	checkCredentials();
+	//newReservation ("2013-06-13 10:30:00", "2013-06-13 11:30:00", "áéíóú", 1);
+	//reservationForm ();
+	//trace (escape("José Alejandro García Muñoz"))
+	
+	window.setInterval(function(){
+		getWeek(strForFrom, strForTo);
+	},6000);
+	
+	/*window.setInterval(function(){
+		checkCredentials();
+	},10000);*/
+	
+	$('#days div, #dayHeads div').css({"width":100/7+"%",
+									   "left":0+"%"});
+	
+	
+	$('#days div:first-child, #days div:last-child').css("background",'rgba(0,0,0,0.1)');
+	for (var i=0; i < 24; i++) {
+		var newDiv = $(document.createElement('div'));
+		newDiv.css({"width":"100%",
+					"height":(100/24)+"%",
+					"position":"absolute",
+					"top":(100/24*i)+"%",
+					"text-align":"right",
+					"padding":"0 -5px",
+					"font-size":"1em"});
+		//a3a8aa
+		var line = $(document.createElement('div'));
+		line.css({"width":"100%",
+				  "height":(100/24)+"%",
+				  "border-top":"1px solid #a3a8aa",
+				  "top":(100/24*i)+"%"});
+		
+		var t = timeToString(8+0.5*i, false);
+		
+		newDiv.html(t);
+		line.attr("id", removeColon(timeToString(8+0.5*i)+":00"));
+		$('#times #gutter').append(newDiv);
+		$('#times #timeLines').append(line);
+	}
+	
+	$('#semanaquentra #nw').click(function(){
+		weekN++;
+		oldData = "";
+		strForFrom = "last Sunday + "+(weekN)+" weeks";
+		strForTo = "last Sunday + "+(weekN+1)+" weeks";
+		getWeek(strForFrom, strForTo);
+	});
+	$('#semanaquentra #lw').click(function(){
+		if (weekN==0)return;
+		weekN--;
+		oldData = "";
+		strForFrom = "last Sunday + "+(weekN)+" weeks";
+		strForTo = "last Sunday + "+(weekN+1)+" weeks";
+		getWeek(strForFrom, strForTo);
+	});
+	
+	$('#nueva_reserva').click(function (e) {
+		$.ajax({
+			url:"scripts/checkCredentials.php",
+			dataType:"json"
+		}).done(function (data){
+			if (data.result == "success") {
+				loggedUser = data.user;
+				postAsAlias = data.postAsAlias;
+				reservationForm();
+			}else{
+				$.ajax({
+					url:"scripts/loginUser.html"
+				}).done(function(data){
+					var newDiv = $(document.createElement ("div"));
+					newDiv.attr('id', 'newReservation');
+					newDiv.addClass('gradientBack');
+					newDiv.html(data);
+					$('#week').after (newDiv);
+					$('#loginBtn').click(function(){
+						//alert ($('#remember').is(':checked')?"true":"false")
+						$.ajax({
+							url:"scripts/loginUser.php",
+							type:"POST",
+							data:{uname:$('#uname').val(),
+								  pwd:SHA256($('#pwd').val()),
+								  remember:$('#remember').is(':checked')?"true":"false"},
+							dataType:"json"
+						}).done(function(data){
+							if (data.result == "success"){
+								newDiv.remove();
+								loggedUser = data.user;
+								postAsAlias = data.postAsAlias;
+								reservationForm();
+							}else {
+								//alert (JSON.stringify(data));
+							}
+						});
+					});
+					$('#newReservation #cerrar').click(function(){$(this).parent().remove()});
+				});
+			}
+		});
+	});
+});
+
+function checkCredentials () {
+	$.ajax({
+		url:"scripts/checkCredentials.php",
+		dataType:"json"
+	}).done(function(data){
+		//trace(JSON.stringify(data.user));
+		if (data.result == "success") {
+			loggedIn = true;
+			loggedUser = data.user;
+		}else{
+			loggedIn = false;
+			loggedUser = null;
+			error = data;
+		}
+	})
+}
+
+function getWeek (dateFrom, dateTo) {
+	strForFrom = dateFrom;
+	strForTo = dateTo;
+	$.post("scripts/get_week.php",
+		   {"from":dateFrom, "to":dateTo},
+		   loaded,
+		   'json'
+		   );
+	$.ajax({url: "index.html"}).done(checkVersion);
+}
+
+function checkVersion (d) {
+	var openTag = '<script type="text/javascript" id="mainScript">';
+	var closeTag = '<\/script>';
+	var start = d.indexOf(openTag) + openTag.length;
+	var end = d.indexOf(closeTag, start);
+	
+	var serverScript = d.substring(start, end);
+	var script = $('#mainScript').text();
+	if (serverScript != script) location.reload();
+}
+
+function loaded ( data ) {
+	today = data.timeInfo;
+	var todayStr = dateToString (today.anio, today.mes, today.dia);
+	date = todayStr;
+	//alert (today.fechaSQL_desde)
+	//$('#dayHeads div p span').html("hola");
+	var week0 = new Date (today.fechaSQL_desde);
+	var dateW0 = today.fechaSQL_desde.split(" ")[0].split("-");
+	for (var i in dateW0) {
+		dateW0 [i] = parseInt (dateW0[i], 10);
+	}
+	
+	$('#nombre_del_mes p').html ( months[dateW0[1]-1] );
+	for (var i=0; i < 7; i++) {
+		var newDiv = $('#days div:nth-child('+(i+1)+')');
+		var newDay = new Date (dateW0[0], dateW0[1]-1, dateW0[2]+i);
+		//newDay.setDate(week0.getDate()+i);
+		
+		var date = {dia:newDay.getDate(),mes:newDay.getMonth(),anio:newDay.getFullYear()};
+		
+		newDiv.attr("id", dateToString (date.anio, date.mes+1, date.dia));
+		//newDiv.text (dateToString (date.anio, date.mes+1, date.dia));
+		
+		var head = $('#dayHeads div:nth-child('+(i+1)+') span');
+		head.text(date.dia);
+	}
+	//alert (dateW0[1] == date.mes);
+	if (dateW0[1] == date.mes) {
+		$('#nombre_del_mes p').append(' - ' + months[date.mes]);
+	}
+	
+	if (!adjusted) {
+		$('#days div').width($('#days div').width() - 1);
+		$('#days div').css('border-right', '1px solid #b8b8b8');
+		adjusted = true;
+	}
+	//trace (today.diaDeSemana)
+	var todayDiv = $('#'+todayStr);
+	var todayIndex = ($(todayDiv).index());
+	
+	$('#dayMarker #graph').css({"width":(parseInt(todayDiv.css("width"))-12)+"px",
+								"left":(14.28571428571429*today.diaDeSemana)+"%",
+								"height":(parseInt($('#dayMarker').css("height"))+2-parseInt($('#dayHeads').css("height"))+"px"),
+								"top":"1px",
+								"border-top-width":(parseInt($('#dayHeads').css("height"))-1)+"px"});
+	
+	if (todayIndex==-1) {
+		$('#dayMarker div').hide();
+	}else {
+		$('#dayMarker div').show();
+	}
+	//$('#dayMarker').attr('data-date', )
+	
+	var mH = $('#dayMarker #markerHead');
+	mH.html ($('#dayHeads div:nth-child('+(todayIndex+1)+')').html());
+	mH.css({"width":$('#dayMarker #graph').css("width"),
+			"height":$('#dayMarker #graph').css("border-top-width"),
+			"left":(parseInt($('#dayMarker #graph').css("left"))+6)+"px"});
+	
+	var at8am = new Date(today.anio, today.mes-1, today.dia, 8, 0, 0, 0);
+	var time = new Date();
+	var elapsed = (time.getTime() - at8am.getTime())/60000;
+	
+	var timeTop = (elapsed/(12*60)*100)+"%";
+	
+	var now = $('#now, #nowTime');
+	now.css("top",timeTop);
+	
+	var time = new Date();
+	$('#nowTime').text(time.getHours()+":"+put0s(time.getMinutes()));
+	
+	if (data.reservations!=""){
+		if (JSON.stringify(oldData) != JSON.stringify(data.reservations)) {
+			$('#week').html("");
+			var w = buildDiffs (oldData, data.reservations);
+			for (var r in w) {
+				var slot = makeSlot(w[r].reservation);
+				if (slot.data('append'))$('#week').append(slot);
+				slot.css("top", (parseInt(slot.css("top")))+"px");
+				slot.css("left", (parseInt(slot.css("left")))+"px");
+				if (w[r].shouldRedraw) {
+					slot.hide().fadeIn();
+				}
+				slot.hover(function(e){
+					if (loggedUser.id == $(this).data('setter-id') || loggedUser.utype == 1) {
+						$('#edcl',this).fadeToggle(0.3);
+					}
+				});
+			}
+			oldData = data.reservations;
+		}else {
+			if (isRed) {
+				if (!(dateBreakdown(isRed.data('t0')) < new Date() && new Date < new Date(dateBreakdown('tF')))) {
+					var rgba = isRed.data('color0')
+					isRed.css({"background":rgba.rgba,
+							   "color":rgba.rgbAlt});
+				}
+			}
+		}
+	}else {
+		oldData = "";
+		$('#week').html("");
+	}
+}
+
+function buildDiffs (o, n) {
+	var oDict = makeDict(o), nDict = makeDict(n);
+	var w = new Array();
+	
+	for (var i in nDict) {
+		//alert (i);
+		var toPush;
+		toPush = nDict [i];
+		toPush["shouldRedraw"] = oDict[i]?false:true;
+		w.push(nDict[i]);
+	}
+	return w;
+}
+
+function makeDict(a){
+	var ret = new Array();
+	for (i in a) {
+		var curr = a[i]
+		var hash = curr.startTime + curr.endTime + curr.description+curr.email;
+		ret [hash] = {reservation:a[i]};
+	}
+	return ret;
+}
+
+function makeSlot (data) {
+	//trace (JSON.stringify(data))
+	var slot = $(document.createElement('div'));
+	//var slotStart = new Date(data.startTime);
+	//var slotEnd = new Date(data.endTime);
+	var slotStart = dateBreakdown (data.startTime);
+	var slotEnd = dateBreakdown (data.endTime);
+	var at8 = dateBreakdown(data.startTime).setHours(8, 0, 0, 0);
+	var dateTime0 = timeFromString(data.startTime);
+	var dateTimeF = timeFromString(data.endTime);
+	var forH = (100/24*(dateTimeF[2]-dateTime0[2])/0.5) + "%";
+	var forL = (slotStart.getDay()*14.28571428571429)+"%"//$("#"+dateTime0[0]).css("left");
+	var forT = (100/24*((slotStart - at8)/3600000/0.5))+"%";
+	var rgba = (slotStart < new Date() && new Date() < slotEnd)?hex2rgba('#FF0000',1, -0.7):hex2rgba(data.color,0.6, -0.7);
+	
+	if (slotStart < new Date() && new Date() < slotEnd) {
+		isRed = slot;
+	}
+	slot.addClass("slot");
+	slot.height(forH);
+	slot.css({//"height":forH,
+			  "left":forL,
+			  "top":forT,
+			  "background":rgba.rgba,
+			  "color":rgba.rgbAlt,
+			  "border-top":rgba.rgbAlt + " 1px solid"});
+	slot.html("<p style='margin-left:12px;margin-top:5px'><strong><a href='mailto:"+data.email+"'>"+(data.name+" "+data.lastname)/*.toUpperCase()*/+"</a></strong><br><span style='color:#FFF'>"+unescape(data.description/*.toUpperCase()*/)+"</span></p>");
+	var edit_close = $(document.createElement('div'));
+	edit_close.attr('id', 'edcl');
+	edit_close.css({"top":"5px", "right":"20px", "font-size":"0.9em", "color":rgba.rgbAlt, "font-style":"bold", "cursor":"pointer"});
+	edit_close.html(/*'<span id="edit">editar</span> | */'<p id="cerrar">X</span>');
+	slot.append(edit_close);
+	edit_close.click(function(){warnUser("¿Estás seguro que quieres cancelar la cita?", [data.ID])});
+	edit_close.hide();
+	slot.data('setter-id', data.reserved_by);
+	slot.data('setter-type', data.utype);
+	slot.data('reservation-id', data.ID);
+	slot.data('append', $('#'+data.startTime.split(" ")[0]).length?true:false);
+	slot.data('t0', data.startTime);
+	slot.data('tF', data.endTime);
+	slot.data('color0', hex2rgba(data.color,0.6, -0.7));
+	return slot;
+}
+
+function deleteReservation (id) {
+	$.ajax({
+		url:"scripts/deactivateReservation.php",
+		data:{ID:id},
+		type:"POST",
+		dataType:"json",
+		error:function(e){alert (e.status)}
+	}).done(function(data){
+		if (data.result == "success") {
+			getWeek();
+		}
+	});
+}
+
+function trace(s){
+	if (!$('#trace').length) {
+		var trace = $(document.createElement('div'));
+		trace.attr('id', 'trace');
+		$('body').append(trace);
+	}
+	$('#trace').text(JSON.stringify(s));
+}
+
+function put0s(n,l){
+	if (!l) {
+		var l=2;
+	}
+	var str = n.toString();
+	while (str.length < l) {
+		str = "0"+str;
+	}
+	return str;
+}
+
+function timeToString(time,leading0){
+	if (leading0==undefined) {
+		var leading0s = true;
+	}
+	var rnd = Math.floor(time);
+	var append = rnd==time?"00":"30";
+	return leading0s?put0s(rnd)+":"+append:rnd+":"+append;
+}
+
+function timeFromString(str){
+	var dateTime = str.split(" ");
+	var timeNum = dateTime [1].split(":");
+	//alert(parseInt(timeNum[0]));
+	var add = timeNum [1]=="30"?0.5:0;
+	return new Array(dateTime[0],dateTime[1],parseInt(timeNum[0],10)+add);
+}
+
+function dateToString (y, m, d) {
+	return y+"-"+put0s(m)+"-"+put0s(d)
+}
+
+function removeColon (str){
+	return str.replace (/:/g, "");
+}
+
+function hex2rgba(hexStr,a,m){
+	if(!a)a=1;
+	if(!m)m=0;
+    // note: hexStr should be #rrggbb
+    var hex = parseInt(hexStr.substring(1), 16);
+    var r = (hex & 0xff0000) >> 16;
+    var g = (hex & 0x00ff00) >> 8;
+    var b = hex & 0x0000ff;
+	
+	function alterColor (c,m) {
+		return Math.floor(m<0?c-(c*m*-1):c+(256-c)*m);
+	}
+	
+	rAlt = alterColor(r,m);
+	gAlt = alterColor(g,m);
+	bAlt = alterColor(b,m);
+	
+	var retObj = {rgb:     "rgb("+r+","+g+","+b+")",
+				  rgbAlt:  "rgb("+rAlt+","+gAlt+","+bAlt+")",
+				  rgba:    "rgba("+r+","+g+","+b+","+a+")",
+				  rgbaAlt: "rgba("+rAlt+","+gAlt+","+bAlt+","+a+")",
+				  arr:     {r:r, g:g, b:b,a:a},
+				  arrAlt:  {r:rAlt, g:gAlt, b:bAlt,a:a}};
+	
+    return retObj;
+}
+
+function reservationForm () {
+	$.ajax ({
+		url:"scripts/reservation_form.html"
+	}).done(function (data){
+		var newDiv = $(document.createElement ("div"));
+		newDiv.attr('id', 'newReservation');
+		newDiv.addClass('gradientBack');
+		newDiv.html(data);
+		var calendar = makeWidget(callback);
+		calendar.css({"position":"absolute", "top":"15px", "left":"440px"});
+		
+		var start, end;
+		$('#week').after (newDiv);
+		$('#inicia').before (calendar);
+		var startTimeSlots = fillTime (8, 21);
+		$('#startTime').append(startTimeSlots);
+		$('#loggedUser').text ("Hola, " + loggedUser.name + " " + loggedUser.lastname);
+		//trace (loggedUser)
+		//$('#reservationForm').prepend(calendar);
+		if (postAsAlias === true) {
+			var aliasDiv = $(document.createElement('div'))
+			var aliasBox = $(document.createElement('select'));
+			aliasBox.attr('id', 'aliasBox');
+			aliasDiv.css({"position":"absolute","top":"20px","right":"10px","font-size":"18px"})
+			aliasBox.append ('<option></option>');
+			$.ajax({url:'scripts/get_users.php',
+					dataType: 'json'
+			}).done (function(data){
+				var opts = fillUsers (data, loggedUser.id);
+				aliasBox.append (opts);
+			});
+			aliasDiv.html("PARA: ");
+			aliasDiv.append(aliasBox);
+			$('#formContainer').append (aliasDiv);
+		}
+		
+		$('#startTime').change(function (){
+			var endTime;
+			if ($('#termina').length) $('#termina').remove();
+			var termina = $(document.createElement("div"));
+			termina.attr("id", "termina");
+			termina.text("TERMINA ");
+			setStart ($(this).val());
+			if (!$('#endTime').length) {
+				endTime = $(document.createElement("select"));
+				endTime.attr("id", "endTime");
+				$(this).parent().after(termina);
+				endTime.change (function () {
+					setEnd ($(this).val());
+				})
+			}else {
+				endTime = $('#endTime');
+				endTime.html("");
+			}
+			endTime.html ('<option>Fin</option>');
+			var start = timeFromString(" "+$(this).val())[2]+0.5;
+			var endTimeSlots = fillTime (start, start+2);
+			endTime.append(endTimeSlots);
+			termina.append(endTime);
+		});
+		
+		$('#sendReservation').click(function(){
+			description = $('#description').val();
+			newReservation (date+" "+t0, date+" "+tf, description, loggedUser.id);
+		});
+		$('#newReservation #cerrar').click(function(){$(this).parent().remove()});
+		
+		
+		/*$('select#user').html(fillUsers(users));
+		$('select#user').change(function(s){
+			$('#invitees').html(fillUsers(users,$(this).val()));
+		});*/
+	})
+}
+
+function callback () {
+	$('.selected').removeClass('selected');
+	var val = new Date($(this).data("date"));
+	date = val.toSQLDateString();
+	//$('#friendlyDate').val(val.toReadableDateString());
+	$(this).addClass("selected");
+}
+
+function fillUsers (users, except) {
+	var s = except||-1;
+	var opts = new Array();
+	for (var i in users) {
+		if (users[i].ID != s) {
+			var opt = $(document.createElement("option"));
+			opt.attr("value", users[i].ID);
+			opt.html(unescape(users[i].name + " " + users[i].lastname));
+			opts.push(opt);
+		}
+	}
+	return opts;
+}
+
+function fillTime (start, end) {
+	var ret = new Array();
+	end = end>21?21.5:end;
+	for (var i = start; i < end; i+=0.5) {
+		var time = $(document.createElement("option"));
+		time.attr("value", timeToString(i)+":00");
+		time.html(timeToString(i, false));
+		ret.push (time);
+	}
+	return ret;
+}
+
+function setStart (data) {
+	t0 = data;
+}
+
+function setEnd (data) {
+	tf = data;
+}
+
+function newReservation (t0, tf, description, u_id, invitees ) {
+	var for_u_id = $('#aliasBox').val()||u_id;
+	
+	/*$.post("scripts/new_reservation.php",
+		   {t0:t0, tf:tf, description:escape(description), u_id:u_id, invitees:invitees},
+		   reserve,
+		   'json'
+		   );*/
+	$.ajax({
+		url:"scripts/new_reservation.php",
+		data: {t0:t0, tf:tf, description:escape(description), u_id:for_u_id, invitees:invitees},
+		dataType:"json",
+		type:"POST",
+		success: reserve,
+		error: function(e){alert (e.status)}
+	});
+}
+
+function reserve (data) {
+	if (data.result == "success") {
+		$('#newReservation').remove();
+		date = "";
+		t0 = "";
+		tf = "";
+		description = "";
+		getWeek(strForFrom, strForTo);
+	}else {
+		if (data.type == "collision") {
+			var collisions = data.info;
+			var utype = loggedUser.utype;
+			var remove = new Array();
+			var warningText = "Esta(s) reservaciones tienen conflicto con la tuya y las puedes quitar:";
+			var warningCollisions = new Array();
+			for (i in collisions) {
+				var c = collisions[i];
+				if (utype == 1 || (utype == c.utype && loggedUser.id != c.reserved_by)) {
+					warnUser("Hay al menos una reservación en conflicto con la tuya. Por favor intenta reservar a otra hora.");
+					i = collisions.length;
+					return;
+				}
+				warningCollisions.push(unescape(c.description+", reservada por: "+c.name+" "+c.lastname));
+				remove.push(c.ID);
+			}
+			
+			warnUser (warningText+"<br>"+warningCollisions.join("<br>"), remove, true);
+		}
+	}
+}
+
+function warnUser (warning, removes, insert) {
+	var warningDiv = $(document.createElement('div'));
+	//warningDiv.attr('id', "warning");
+	warningDiv.html(warning);
+	warningDiv.css({"background-color":"#d0dadf",
+					"color":"#60666a",
+					"width":"275px",
+					"height":"200px",
+					"border-radius":"10px",
+					"border":"solid rgba(82,96,103,0.47) 3px"});
+	$('body').append(warningDiv);
+	
+	var cancel = $(document.createElement('div'));
+	cancel.text("CANCELAR");
+	cancel.css (cancelCLass);
+	cancel.click(function(){warningDiv.remove()});
+	
+	var ok = $(document.createElement('div'));
+	ok.text("ACEPTAR");
+	ok.css (okCLass);
+	ok.click(function(){
+		for (i in removes) {
+			deleteReservation (removes[i]);
+		}
+		if (insert) {
+			newReservation (date+" "+t0, date+" "+tf, description, loggedUser.id);
+		}
+		warningDiv.remove();
+	});
+	
+	if (removes) {
+		warningDiv.append(cancel);
+		warningDiv.append(ok);
+	}else {
+		warningDiv.append(ok);
+	}
+}
+
+function dateBreakdown (str) {
+	var dateTime = str.split(" ");
+	var date = dateTime[0].split("-");
+	var time = dateTime[1].split(":");
+	return new Date (date[0], parseInt(date[1], 10)-1, date[2], time[0], time[1], time[2]);
+}
+
+</script>
+</head>
+
+<body>
+<div id="fullContainer" class="gradientBack">
+
+<div id="nombre_del_mes"><p>HOLA</p></div>
+<div id="semanaquentra">
+    <img id="lw" src="images/flecha_i.png" width="25" height="25">
+    <img id="nw" src="images/flecha_d.png" width="25" height="25">
+</div>
+<div id="nueva_reserva"><img src="images/nueva_reserva.png" width="25" height="25"></div>
+
+<div id="back"></div>
+
+<div id="dayHeads">
+    <div id="Sunday">    <p>DOMINGO <span></span></p>   </div>
+    <div id="Monday">    <p>LUNES <span></span></p>     </div>
+    <div id="Tuesday">   <p>MARTES <span></span></p>    </div>
+    <div id="Wednesday"> <p>MIÉRCOLES <span></span></p> </div>
+    <div id="Thursday">  <p>JUEVES <span></span></p>    </div>
+    <div id="Friday">    <p>VIERNES <span></span></p>   </div>
+    <div id="Saturday">  <p>SÁBADO <span></span></p>    </div>
+</div>
+
+<div id="times">
+  <div id="gutter"></div>
+  <div id="timeLines"></div>
+</div>
+
+<div id="days">
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+  <div></div>
+</div>
+
+<div id="dayMarker">
+  <div id="graph"></div>
+  <div id="markerHead"></div>
+</div>
+
+<div id="timeLine">
+  <div id="now"></div>
+  <div id="nowTime">8:00</div>
+</div>
+
+<div id="week">
+
+</div>
+
+<!--TEMPORARY!!!!!-->
+<!--<div id="newReservation" class="gradientBack">
+<div id="cerrar" style="position:absolute;top:5px;right:5%;cursor:pointer;width:25px;height:25px"><img src="images/cerrar.png" width="25" height="25"></div>
+<div id="formContainer" class="gradientBack2">
+<div id="loggedUser"></div>
+<div id="inicia">
+INICIA <select id="startTime" name="startTime">
+<option>Inicio</option>
+</select>
+</div>
+<div id="descripcion">
+DESCRIPCIÓN <textarea id="description" name="description" placeholder="descripción" type="text"></textarea>
+</div>
+<input id="sendReservation" name="Crear" type="submit" value="CREAR">
+</div>
+</div>-->
+<!--END TEMPORARY!!!!-->
+
+</div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+@charset "UTF-8";
+/* CSS Document */
+.calendar {
+	width: 281px;
+	height: 200px;
+	background: #376d9f;
+	display: block;
+	overflow: hidden;
+	float: left;
+	font-family: "century gothic";
+	text-align: center;
+	border-radius: 7px;
+	border: 3px #265d90 solid;
+	font-size: 18px;
+}
+.calendarHead {
+	float: left;
+	width: 10%;
+	color:#FFF;
+	text-align: center;
+	line-height: 30px;
+}
+.calendarDay {
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+  	-moz-user-select: none;     /* Firefox all */
+  	-ms-user-select: none; 
+	float: left;
+	width: 14.28571428571429%;
+	display: block;
+	text-align: center;
+	cursor: default;
+}
+#daysDiv {
+	padding: 5px;
+	width: 88%;
+	height: 75%;
+	display: inline-block;
+	border-radius: 7px;
+	background: #FFF;
+	border: 3px #265d90 solid;
+}
+.dayInitials {
+	color: #376d9f;
+}
+ul li.dayInitials:nth-child(7n+7), ul li.dayInitials:nth-child(7n+1) {
+	color: #83a6c7;
+}
+.currentMonth {
+	color: #606060;
+}
+.otherMonth {
+	color: #a5a5a5;
+}
+.clickable:hover, .selected{
+	background: #6898c4;
+	color: #FFF;
+}
+.clickable {
+	cursor: pointer;
+}
+.today  {
+	box-shadow: 0px 0px 1pt 1pt #6998c4;
+	font-weight: bold;
+}
+ul li {
+	/*outline-radius: 3px;*/
+	border-radius: 3px;
+	display: block;
+	height: 16.667%;
+}
+ul li:nth-child(7n+7), ul li:nth-child(7n+1) {
+	color: #aebece;
+}
+ul li:nth-child(7n+7) {
+	border-right: none;
+}
